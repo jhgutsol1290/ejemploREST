@@ -3,111 +3,174 @@ const Task = require('../models/Task')
 
 const router = Router()
 
-
-//---------------------------
-//Get
-//---------------------------
 router.get('/', async (req, res)=>{
-
-
-    try {
+    /* try {
         
-    const tasks = await Task.find({})
+        const tasks = await Task.find({})
 
-    res.json({
-        ok: true,
-        tasks
-    })
+        res.json({
+            ok: true,
+            data: tasks
+        })
+
+
 
     } catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             ok: false,
-            error: error
+            message: error
         })
-    }
+    } */
+
+    Task.find({}, (err, tasksDB)=>{
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                err
+            })
+        }
+
+        return res.json({
+            ok: true,
+            data: tasksDB
+        })
+    })
 })
 
-//---------------------------
-//Post
-//---------------------------
 router.post('/', async (req, res)=>{
     const task = new Task()
+    const body = req.body
 
-    task.name = req.body.name
-    task.description = req.body.description
+    task.title = body.title
+    task.description = body.description
 
-
-    try {
-
-        const newTask = await task.save()
+    /* try {
+        
+        const taskPosted = await task.save()
 
         res.json({
             ok: true,
-            task: newTask
+            data: taskPosted
         })
 
     } catch (error) {
-        res.status(400).json({
+        
+        res.status(500).json({
             ok: false,
-            error
+            message: error
         })
-    }
 
+    } */
 
+    task.save((err, taskDB)=>{
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                err
+            })
+        }
+
+        return res.json({
+            ok: true,
+            data: taskDB
+        })
+    })
 })
 
-//---------------------------
-//Put
-//---------------------------
 router.put('/edit/:id', async (req, res)=>{
-    const id = req.params.id
 
-    try {
-    
-        const taskUpdated = await Task.updateOne({_id: id}, req.body)
+    const id = req.params.id
+    const dataUpdated = {
+        title: req.body.title,
+        description: req.body.description,
+        status: req.body.status
+    }
+
+    /* try {
+        
+        const taskUpdated = await Task.findByIdAndUpdate(id, dataUpdated)
 
         res.json({
             ok: true,
-            task: taskUpdated
+            data: taskUpdated
         })
 
     } catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             ok: false,
-            error
+            message: error
         })
-    }
+    } */
 
+    Task.findByIdAndUpdate(id, req.body, (err, taskDB)=>{
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                err
+            })
+        }
+
+        if(!taskDB){
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'ID no existente'
+                }
+            })
+        }
+
+        return res.json({
+            ok: true,
+            data: taskDB
+        })
+    })
 })
 
-//---------------------------
-//Delete
-//---------------------------
+
 router.delete('/delete/:id', async (req, res)=>{
+
     const id = req.params.id
 
-    try {
-    
-        const taskDeleted = await Task.deleteOne({_id: id})
+    /* try {
+        
+        const taskDeleted = await Task.findByIdAndDelete(id)
 
         res.json({
             ok: true,
-            task: taskDeleted
+            data: taskDeleted
         })
 
     } catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             ok: false,
-            error
+            message: error
         })
-    }
+    } */
 
+    Task.findByIdAndRemove(id, (err, taskDB)=>{
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                err
+            })
+        }
+
+        if(!taskDB){
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'ID no existente'
+                }
+            })
+        }
+
+        return res.json({
+            ok: true,
+            data: taskDB,
+            message: 'Eliminado satisfactoriamente'
+        })
+    })    
 })
-
-
-
-
-
 
 
 
